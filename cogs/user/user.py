@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import sqlite3
+from game.player import Player
 
 
 class SignupModal(discord.ui.Modal, title="Create your player profile"):
@@ -16,9 +17,7 @@ class SignupModal(discord.ui.Modal, title="Create your player profile"):
 
         db = interaction.client.db
         try:
-            await db.execute("INSERT INTO users (user_id, username) VALUES (?, ?)",
-                             (interaction.user.id, name))
-            await db.commit()
+            await Player(interaction.user.id, name).create(db)
         except sqlite3.IntegrityError:
             # Fires if this Discord user already has a profile, or the username is taken
             await interaction.response.send_message(
@@ -59,20 +58,19 @@ class User(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     #This command returns the okayer's information, sech as their usernames, balance and other information.
+
     @app_commands.command(name = "profile", description = "Check your player profile for the game.")
     async def profile(self, interaction: discord.Interaction):
-        db = self.bot.db
-        async with db. execute("SELECT username, balance FROM users WHERE user_id = ?", (interaction.user.id,)) as cursor:
-            row = await cursor.fetchone()
-
-        if row is None:
+        player = await Player.load(self.bot.db, interaction.user.id)
+        if player is None:
             await interaction.response.send_message("You don't have a profile yet. Use /newuser to create one.", ephemeral=True)
             return
 
-        embed = discord.Embed(title="Player Profile",
-                              description=f"Your username is {row['username']}. \n Balance: {row['balance']}", color=discord.Color.blue())
-        await interaction.response.send_message(embed=embed)
+        embed = discord.Embed(title = f"{player.username}'s Profile", color = discord.Color.blue())
+        for stat, value in player.stats().items():
+            embed.add_field(name = stat.capitalize(), value = str(value), inline = True)
 
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(User(bot))

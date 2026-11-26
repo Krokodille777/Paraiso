@@ -24,9 +24,21 @@ class Monica(commands.Bot):
         self.db.row_factory = aiosqlite.Row
         await self.db.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        user_id  INTEGER PRIMARY KEY,
-        username TEXT NOT NULL UNIQUE,
-        balance  INTEGER NOT NULL DEFAULT 100
+        user_id         INTEGER PRIMARY KEY,
+        username        TEXT    NOT NULL UNIQUE,
+        money           INTEGER NOT NULL,   
+        health          INTEGER NOT NULL,
+        energy          INTEGER NOT NULL,
+        happiness       INTEGER NOT NULL,
+        work_state      INTEGER NOT NULL,
+        last_work_time  REAL    NOT NULL,
+        bought_at       REAL    NOT NULL,
+        hunger          INTEGER NOT NULL,
+        perception      REAL    NOT NULL,
+        endurance       REAL    NOT NULL,
+        intelligence    REAL    NOT NULL,
+        dexterity       REAL    NOT NULL,
+        luck            REAL    NOT NULL
     )
 """)
         await self.db.execute("""
@@ -46,6 +58,7 @@ class Monica(commands.Bot):
         await self.load_extension("cogs.user.user")
         await self.load_extension("cogs.money.balance")
         await self.load_extension("cogs.inventory.inventory")
+        await self.load_extension("cogs.inventory.catalog")
         self.tree.copy_global_to(guild=DEV_GUILD)
         await self.tree.sync(guild=DEV_GUILD)
 
