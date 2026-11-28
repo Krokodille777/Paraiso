@@ -1,5 +1,5 @@
 import enum
-
+import json
 
 class WorkState(enum.Enum):
     DONE = 1
@@ -27,7 +27,10 @@ class Player:
         self.happiness = happiness
         self.work_state = WorkState(work_state)   # accepts both WorkState and a number from the DB
         self.last_work_time = last_work_time
-        self.bought_at = bought_at
+        if isinstance(bought_at, str):
+            self.bought_at = json.loads(bought_at)
+        else:
+            self.bought_at = bought_at or {}
         self.hunger = hunger
         self.perception = perception
         self.endurance = endurance
@@ -40,7 +43,11 @@ class Player:
         values = []
         for column in STAT_COLUMNS:
             value = getattr(self, column)
-            values.append(value.value if isinstance(value, enum.Enum) else value)
+            if isinstance(value, enum.Enum):
+                value = (value.value)
+            elif isinstance(value, dict):
+                value = json.dumps(value)
+            values.append(value)
         return values
 
     @classmethod

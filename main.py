@@ -32,7 +32,7 @@ class Monica(commands.Bot):
         happiness       INTEGER NOT NULL,
         work_state      INTEGER NOT NULL,
         last_work_time  REAL    NOT NULL,
-        bought_at       REAL    NOT NULL,
+        bought_at       TEXT   NOT NULL,
         hunger          INTEGER NOT NULL,
         perception      REAL    NOT NULL,
         endurance       REAL    NOT NULL,
@@ -59,6 +59,7 @@ class Monica(commands.Bot):
         await self.load_extension("cogs.money.balance")
         await self.load_extension("cogs.inventory.inventory")
         await self.load_extension("cogs.inventory.catalog")
+        await self.load_extension("cogs.money.trade")
         self.tree.copy_global_to(guild=DEV_GUILD)
         await self.tree.sync(guild=DEV_GUILD)
 
